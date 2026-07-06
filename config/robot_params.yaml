@@ -1,0 +1,16 @@
+robot:
+  mass_kg: 80.0
+  izz_kgm2: 11.2
+  com_offset_x_m: -0.076
+  wheel_radius_m: 0.128
+  half_wheelbase_m: 0.457
+  half_track_m: 0.457
+
+actuator:
+  wheel_torque_max_nm: 2.35
+  wheel_force_max_n: 18.4
+  wheel_speed_max_radps: 25.1
+
+friction:
+  mu_static: 0.9
+  mu_kinetic: 0.75
