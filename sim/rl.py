@@ -2,6 +2,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
+from sim.disturbance import Scenario, step_disturbance
 from sim.plant import act, k, plant_step
 from sim.trajectories import circle_ref, figure8_ref, waypoint_ref
 
@@ -44,6 +45,37 @@ class TrackingEnv(gym.Env):
         wrench = np.array([action[0]*F_MAX, action[1]*F_MAX, action[2]*M_MAX])
         self.state, applied = plant_step(self.state, wrench, self.dt)
         self.i+=1
+        obs = observe(self.state, self.ref[self.i])
+        pos_err2 = obs[0]**2 + obs[1]**2
+        eth = np.arctan2(obs[2], obs[3])
+        reward = float(-(pos_err2 + 0.5 * eth**2 + 1e-5 * float(np.sum(applied**2))))
+        terminated = bool(pos_err2 > 25.0)
+        if terminated:
+            reward -= 50.0
+        truncated = self.i >= self.n_steps
+        return obs, reward, terminated, truncated, {}
+
+class TrackingEnvDR(TrackingEnv):
+    def reset(self, seed = None, options = None):
+        obs, info = super().reset(seed=seed, options=options)
+        r = self.np_random
+        mu_s = float(r.uniform(0.09, 0.9))
+        self.sc = Scenario(
+            name="dr",
+            mass=float(r.uniform(70.0, 115.0)),
+            izz=float(r.uniform(9.0, 16.0)),
+            mu_s=mu_s,
+            mu_k=mu_s * float(r.uniform(0.7, 0.95)),
+            com_x=float(r.uniform(-0.1, 0.1)),
+            action_noise=float(r.uniform(0.0, 3.0)),
+        )
+        self.dr_rng = np.random.default_rng(int(r.integers(2**31)))
+        return obs, info
+
+    def step(self, action):
+        wrench = np.array([action[0]*F_MAX, action[1]*F_MAX, action[2]*M_MAX])
+        self.state, applied = step_disturbance(self.state, wrench, self.dt, self.sc, self.i * self.dt, self.dr_rng)
+        self.i += 1
         obs = observe(self.state, self.ref[self.i])
         pos_err2 = obs[0]**2 + obs[1]**2
         eth = np.arctan2(obs[2], obs[3])
