@@ -128,12 +128,7 @@ were excluded from the training parameters, the disturbance was entirely out-of-
 (OOD) for the SAC-DR agent. Furthermore, the aggressive control policy fostered by 
 DR exacerbated instability during the impulse event rather than mitigating it.
 
-<!-- ============================================================ -->
-<!-- PLACE SAC-DR LEARNING CURVE IMAGE HERE                        -->
-<!-- After regenerating the training curve, save it as            -->
-<!-- results/sac_dr_curve.png and uncomment the line below:       -->
-<!-- ![SAC-DR training curve](results/sac_dr_curve.png)           -->
-<!-- ============================================================ -->
+![SAC-DR training curve](results/sac_dr_curve.png)           
 
 ## Key Takeaway:
 
